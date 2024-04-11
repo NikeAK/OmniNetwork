@@ -1,0 +1,2 @@
+# OmniNetwork
+Airdrop checker
