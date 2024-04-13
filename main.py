@@ -99,9 +99,9 @@ class TaskManager:
     async def check_proxy(proxy: str) -> str|bool:
         try:
             async with AsyncSession(proxy=proxy, verify=False) as session:
-                    await session.get('https://omni-issuer-node.clique.tech')
-                    response = await session.get('https://api.ipify.org/?format=json', proxy=proxy, timeout=5)
-                    answer = response.json()
+                await session.get('https://omni-issuer-node.clique.tech')
+                response = await session.get('https://api.ipify.org/?format=json', proxy=proxy, timeout=5)
+                answer = response.json()
         except Exception:
             return False
         else:
