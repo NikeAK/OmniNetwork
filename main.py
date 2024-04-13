@@ -1,3 +1,4 @@
+import warnings
 import platform
 import asyncio
 import sys
@@ -10,7 +11,8 @@ from loguru import logger
 
 if platform.system() == "Windows":
     asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-
+    
+warnings.filterwarnings("ignore", message="Curlm alread closed!", category=UserWarning)
 Account.enable_unaudited_hdwallet_features()
 
 logger.remove()
@@ -122,18 +124,19 @@ class TaskManager:
             
     async def initialization(self, thread: int):
         while True:
-            if USE_PROXY:
-                async with self.lock:
-                    proxy = self.get_proxy()
-                if not await TaskManager.check_proxy(proxy):
-                    continue
-            else:
-                proxy = None
-
             async with self.lock:
                 if not self.wallets:
                     break
                 address = self.get_address()
+
+            if USE_PROXY:
+                while True:
+                    async with self.lock:
+                        proxy = self.get_proxy()
+                    if await TaskManager.check_proxy(proxy):
+                        break
+            else:
+                proxy = None
                 
             balance = await OmniNetwork(thread, address, proxy).check()
             async with self.lock:
@@ -154,5 +157,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-
 
